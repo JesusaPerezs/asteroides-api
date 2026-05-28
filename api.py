@@ -6,12 +6,23 @@ import os
 app = FastAPI(title="AsteroidesAPI", version="1.0")
 
 def get_bd_connection():
-    return psycopg2.connect(
-        host = os.getenv("DB_HOST"),
-        database = os.getenv("DB_NAME"),
-        user = os.getenv("DB_USER"),
-        password = os.getenv("DB_PASSWORD")
-    )
+    db_host = os.getenv("DB_HOST")
+
+    if db_host.startswith("/"):
+        return psycopg2.connect(
+            host = os.getenv("DB_HOST"),
+            database = os.getenv("DB_NAME"),
+            user = os.getenv("DB_USER"),
+            password = os.getenv("DB_PASSWORD")
+        )
+    else:
+        return psycopg2.connect(
+            host = os.getenv("DB_HOST"),
+            database = os.getenv("DB_NAME"),
+            user = os.getenv("DB_USER"),
+            password = os.getenv("DB_PASSWORD")
+        )
+
 
 @app.get("/asteroides")
 def get_asteroides():
