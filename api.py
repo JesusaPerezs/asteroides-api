@@ -1,15 +1,16 @@
 from fastapi import FastAPI
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import os
 
 app = FastAPI(title="AsteroidesAPI", version="1.0")
 
 def get_bd_connection():
     return psycopg2.connect(
-        host = "35.254.215.53",
-        database = "postgres",
-        user = "postgres",
-        password = "Parisina2324**"
+        host = os.getenv("DB_HOST"),
+        database = os.getenv("DB_NAME"),
+        user = os.getenv("DB_USER"),
+        password = os.getenv("DB_PASSWORD")
     )
 
 @app.get("/asteroides")

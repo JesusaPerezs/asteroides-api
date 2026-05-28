@@ -1,12 +1,13 @@
 import psycopg2
 import json
 from datetime import datetime
+import os
 
 conexion = psycopg2.connect(
-    host = "35.254.215.53",
-    database = "postgres",
-    user = "postgres",
-    password = "Parisina2324**"
+    host = os.getenv("DB_HOST"),
+    database = os.getenv("DB_NAME"),
+    user = os.getenv("DB_USER"),
+    password = os.getenv("DB_PASSWORD")
 )
 
 cursor = conexion.cursor()
