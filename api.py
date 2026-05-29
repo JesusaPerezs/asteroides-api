@@ -2,8 +2,17 @@ from fastapi import FastAPI
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="AsteroidesAPI", version="1.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credential=True,
+    allow_methods = ["*"],
+    allow_headers = ["*"],
+)
 
 def get_bd_connection():
     db_host = os.getenv("DB_HOST")
