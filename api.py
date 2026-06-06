@@ -15,23 +15,12 @@ app.add_middleware(
 )
 
 def get_bd_connection():
-    db_host = os.getenv("DB_HOST")
-
-    if db_host.startswith("/"):
         return psycopg2.connect(
             host = os.getenv("DB_HOST"),
             database = os.getenv("DB_NAME"),
             user = os.getenv("DB_USER"),
             password = os.getenv("DB_PASSWORD")
         )
-    else:
-        return psycopg2.connect(
-            host = os.getenv("DB_HOST"),
-            database = os.getenv("DB_NAME"),
-            user = os.getenv("DB_USER"),
-            password = os.getenv("DB_PASSWORD")
-        )
-
 
 @app.get("/asteroides")
 def get_asteroides():
@@ -43,12 +32,12 @@ def get_asteroides():
     conn.close()
     return {"total": len(asteroides), "asteroides": asteroides}
 
-@app.get("/asteroides")
-def get_asteroides(id: int):
+@app.get("/asteroides/{id}")
+def get_asteroide(id: int):
     conn = get_bd_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("SELECT * FROM asteroides WHERE id = %s", (id))
-    asteroide = cursor.fetchall()
+    cursor.execute("SELECT * FROM asteroides WHERE id = %s", (id,))
+    asteroide = cursor.fetchone()
     cursor.close()
     conn.close()
     return asteroide
