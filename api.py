@@ -69,9 +69,10 @@ def call_NASA():
         for ast in asteroides[:3]:
              nombre = ast["name"]
              tamaño = ast["estimated_diameter"]["kilometers"]["estimated_diameter_min"]
+             peligroso = ast["is_potentially_hazardous_asteroid"]
              insertar = "INSERT INTO asteroides (nombre, tamaño_km, fecha_deteccion, peligroso) VALUES (%s, %s, %s, %s)"
              # %s son placeholders, espacios en blanco que psycopg2 rellena con los valores reales de forma segura
-             cursor.execute(insertar, (nombre, tamaño, fecha, True))
+             cursor.execute(insertar, (nombre, tamaño, fecha, peligroso))
              print(f" - nombre: {nombre}, tamaño: {tamaño:.2f} km")
      conn.commit() # confirmar y guardar permanentemente los cambios en PostgreSQL
      cursor.close()
