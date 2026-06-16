@@ -20,8 +20,9 @@ for fecha, asteroides in datos["near_earth_objects"].items():
     for ast in asteroides[:3]:
         nombre = ast["name"]
         tamaño = ast["estimated_diameter"]["kilometers"]["estimated_diameter_min"]
-        print(f" - nombre: {nombre}, tamaño: {tamaño:.2f} km")
+        peligroso = ast["is_potentially_hazardous_asteroid"]
+        print(f" - nombre: {nombre}, tamaño: {tamaño:.2f} km, Peligroso: {peligroso}")
 
-with open("asteroides.json", "w") as f:
-    json.dump(datos["near_earth_objects"], f, indent=2)
-print("\n Datos guardado en asteroides.json correctamente")
+#with open("asteroides.json", "w") as f:
+ #   json.dump(datos["near_earth_objects"], f, indent=2)
+#print("\n Datos guardado en asteroides.json correctamente")
