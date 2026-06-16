@@ -1,24 +1,24 @@
 from fastapi import FastAPI
 import psycopg2
-from psycopg2.extras import RealDictCursor
-import os
-from fastapi.middleware.cors import CORSMiddleware
+from psycopg2.extras import RealDictCursor # hace que los resultados lleguen como diccionarios
+import os # Se conecta al sistema operativo donde corre tu código
+from fastapi.middleware.cors import CORSMiddleware # Es el guardia de seguridad que controla qué dominios pueden llamar tu API. 
 import requests
 from datetime import datetime, timedelta
 
-app = FastAPI(title="AsteroidesAPI", version="1.0")
+app = FastAPI(title="AsteroidesAPI", version="1.0") # creación de la aplicaciónn
 
-app.add_middleware(
+app.add_middleware( # agregarle una capa a tu app. Imagina que tu API es un restaurante y el middleware es el guardia en la puerta
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods = ["*"],
-    allow_headers = ["*"],
+    allow_origins=["*"], # deja entrar a CUALQUIER dominio
+    allow_credentials=True, # acepta cookies y tokens
+    allow_methods = ["*"], # acepta GET, POST, PUT, DELETE
+    allow_headers = ["*"], # acepta cualquier header: solo para leer o mandar requests
 )
 
 def get_bd_connection():
         return psycopg2.connect(
-            host = os.getenv("DB_HOST"),
+            host = os.getenv("DB_HOST"), # va al sistema operativo de Cloud Run y busca el valor de cada variable. 
             database = os.getenv("DB_NAME"),
             user = os.getenv("DB_USER"),
             password = os.getenv("DB_PASSWORD")
@@ -26,11 +26,11 @@ def get_bd_connection():
 
 @app.get("/asteroides")
 def get_asteroides():
-    conn = get_bd_connection()
+    conn = get_bd_connection() # conexión abierta a PostgreSQL
     cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("SELECT * FROM asteroides")
-    asteroides = cursor.fetchall()
-    cursor.close()
+    cursor.execute("SELECT * FROM asteroides") # panel donde escribes y ejecutas queries.
+    asteroides = cursor.fetchall() # los resultados están listos pero no en Python todavía. fetchall() los jala todos y los guarda en la variable asteroides
+    cursor.close() # cierran el panel y la llamada
     conn.close()
     return {"total": len(asteroides), "asteroides": asteroides}
 
@@ -39,7 +39,7 @@ def get_asteroide(id: int):
     conn = get_bd_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute("SELECT * FROM asteroides WHERE id = %s", (id,))
-    asteroide = cursor.fetchone()
+    asteroide = cursor.fetchone() # es lo mismo pero solo trae un registro
     cursor.close()
     conn.close()
     return asteroide
@@ -49,7 +49,7 @@ def get_asteroide(id: int):
 def health():
     return {"Status": "API Funcionando correctamente"}
 
-@app.post("/asteroides/fetch")
+@app.post("/asteroides/fetch") # POST significa que alguien de afuera llama este endpoint para que tu API haga algo 
 def call_NASA():
      
      hoy = datetime.now().strftime("%Y-%m-%d")
@@ -57,22 +57,24 @@ def call_NASA():
 
      API_KEY = os.getenv("NASA_API_KEY")
 
-     url = f"https://api.nasa.gov/neo/rest/v1/feed?start_date={hoy}&end_date={mañana}&api_key={API_KEY}"
+     url = f"https://api.nasa.gov/neo/rest/v1/feed?start_date={hoy}&end_date={mañana}&api_key={API_KEY}" # URL que la NASA definió para consultar asteroides cercanos. 
      response = requests.get(url)
      datos = response.json()
 
-     conn = get_bd_connection()    # ← antes del loop
-     cursor = conn.cursor()
+     conn = get_bd_connection() # abre la llamada
+     cursor = conn.cursor() # alguien contesta y está listo
 
      for fecha, asteroides in datos["near_earth_objects"].items():
         print(f"fecha: {len(asteroides)} asteroides")
         for ast in asteroides[:3]:
              nombre = ast["name"]
              tamaño = ast["estimated_diameter"]["kilometers"]["estimated_diameter_min"]
+             peligroso = ast["is_potentially_hazardous_asteroid"]
              insertar = "INSERT INTO asteroides (nombre, tamaño_km, fecha_deteccion, peligroso) VALUES (%s, %s, %s, %s)"
-             cursor.execute(insertar, (nombre, tamaño, fecha, True))
+             # %s son placeholders, espacios en blanco que psycopg2 rellena con los valores reales de forma segura
+             cursor.execute(insertar, (nombre, tamaño, fecha, peligroso))
              print(f" - nombre: {nombre}, tamaño: {tamaño:.2f} km")
-     conn.commit()
+     conn.commit() # confirmar y guardar permanentemente los cambios en PostgreSQL
      cursor.close()
      conn.close()
      return {"mensaje": "Asteroides insertados correctamente"}
