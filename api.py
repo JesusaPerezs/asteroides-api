@@ -21,7 +21,8 @@ def get_bd_connection():
             host = os.getenv("DB_HOST"), # va al sistema operativo de Cloud Run y busca el valor de cada variable. 
             database = os.getenv("DB_NAME"),
             user = os.getenv("DB_USER"),
-            password = os.getenv("DB_PASSWORD")
+            password = os.getenv("DB_PASSWORD"),
+            port = os.getenv("DB_PORT")
         )
 
 @app.get("/asteroides")
@@ -68,12 +69,19 @@ def call_NASA():
         print(f"fecha: {len(asteroides)} asteroides")
         for ast in asteroides[:3]:
              nombre = ast["name"]
-             tamaño = ast["estimated_diameter"]["kilometers"]["estimated_diameter_min"]
+             tamaño_km = ast["estimated_diameter"]["kilometers"]["estimated_diameter_min"]
              peligroso = ast["is_potentially_hazardous_asteroid"]
-             insertar = "INSERT INTO asteroides (nombre, tamaño_km, fecha_deteccion, peligroso) VALUES (%s, %s, %s, %s)"
+             nasa_url = ast["nasa_jpl_url"]
+             velocidad_km_hours = ast["close_approach_data"][0]["relative_velocity"]["kilometers_per_hour"]
+             fecha_mayor_proximidad = ast["close_approach_data"][0]["close_approach_date"]
+             distancia_mayor_proximidad = ast["close_approach_data"][0]["miss_distance"]["kilometers"]
+             magnitud = ast["absolute_magnitude_h"]
+             insertar = "INSERT INTO asteroides (nombre, tamaño_km, fecha_deteccion, peligroso, nasa_url, " \
+             "velocidad_km_hours, fecha_mayor_proximidad, distancia_mayor_proximidad, " \
+             "magnitud) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
              # %s son placeholders, espacios en blanco que psycopg2 rellena con los valores reales de forma segura
-             cursor.execute(insertar, (nombre, tamaño, fecha, peligroso))
-             print(f" - nombre: {nombre}, tamaño: {tamaño:.2f} km")
+             cursor.execute(insertar, (nombre, tamaño_km, fecha, peligroso, nasa_url,
+                                       velocidad_km_hours, fecha_mayor_proximidad, distancia_mayor_proximidad, magnitud))
      conn.commit() # confirmar y guardar permanentemente los cambios en PostgreSQL
      cursor.close()
      conn.close()
