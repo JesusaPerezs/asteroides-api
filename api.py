@@ -86,3 +86,17 @@ def call_NASA():
      cursor.close()
      conn.close()
      return {"mensaje": "Asteroides insertados correctamente"}
+
+@app.get("/foto") 
+def get_image():
+    API_KEY = os.getenv("NASA_API_KEY")
+    url = f"https://api.nasa.gov/planetary/apod?api_key={API_KEY}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        datos = response.json()
+        fecha = datos["date"]
+        explicacion = datos["explanation"]
+        link = datos["hdurl"]
+        return {"fecha": fecha, "explicacion": explicacion, "link": link}
+    else:
+        return {"error": response.status_code}
