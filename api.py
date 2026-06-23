@@ -96,7 +96,8 @@ def get_image():
         datos = response.json()
         fecha = datos["date"]
         explicacion = datos["explanation"]
-        link = datos["hdurl"]
-        return {"fecha": fecha, "explicacion": explicacion, "link": link}
+        link = datos["url"]
+        tipo = datos["media_type"]
+        return {"fecha": fecha, "explicacion": explicacion, "link": link, "media_type": tipo}
     else:
         return {"error": response.status_code}
