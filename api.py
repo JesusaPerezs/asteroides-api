@@ -45,7 +45,6 @@ def get_asteroide(id: int):
     conn.close()
     return asteroide
 
-
 @app.get("/")
 def health():
     return {"Status": "API Funcionando correctamente"}
@@ -78,7 +77,7 @@ def call_NASA():
              magnitud = ast["absolute_magnitude_h"]
              insertar = "INSERT INTO asteroides (nombre, tamaño_km, fecha_deteccion, peligroso, nasa_url, " \
              "velocidad_km_hours, fecha_mayor_proximidad, distancia_mayor_proximidad, " \
-             "magnitud) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+             "magnitud) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (nombre) DO NOTHING"
              # %s son placeholders, espacios en blanco que psycopg2 rellena con los valores reales de forma segura
              cursor.execute(insertar, (nombre, tamaño_km, fecha, peligroso, nasa_url,
                                        velocidad_km_hours, fecha_mayor_proximidad, distancia_mayor_proximidad, magnitud))
